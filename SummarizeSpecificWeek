@@ -1,0 +1,181 @@
+Attribute VB_Name = "Module1"
+Sub UgeligSUM()
+    Dim weekNumber As String
+    Dim sheetName As String
+    Dim ws As Worksheet
+    Dim sumWs As Worksheet
+    Dim cell As Range
+    Dim machineName As String
+    Dim hoursWorked As Double
+    Dim moneyEarned As Double
+    Dim summaryStartRow As Long
+    Dim i As Long
+    Dim totalHours As Double
+    Dim totalEarnings As Double
+    Dim lastMachineRow As Long
+    Dim sumRow As Long
+    Dim machineCol As Range
+    Dim weekCol As Range
+    Dim machinePos As Range
+    Dim weekPos As Range
+    Dim sundayCell As Range
+    
+    ' Prompt the user to enter the week number
+    weekNumber = InputBox("Indtast uge nummer (f.eks. 1 for UGE 1):", "Uge Nummer")
+    
+    If weekNumber = "" Then
+        MsgBox "Intet uge nummer indtastet. Operation annulleret."
+        Exit Sub
+    End If
+    
+    ' Construct the sheet name
+    sheetName = weekNumber
+    
+    ' Check if the sheet exists
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets(sheetName)
+    On Error GoTo 0
+    
+    If ws Is Nothing Then
+        MsgBox "Arket " & sheetName & " eksisterer ikke. Indtast venligst et gyldigt uge nummer."
+        Exit Sub
+    End If
+    
+    ' Set the SUM worksheet
+    Set sumWs = ThisWorkbook.Sheets("SUM")
+    
+    ' Initialize the arrays
+    Dim machineNames() As String
+    Dim machineHours() As Double
+    Dim machineEarnings() As Double
+    Dim machineCount As Integer
+    machineCount = 0
+    ReDim machineNames(0 To machineCount)
+    ReDim machineHours(0 To machineCount)
+    ReDim machineEarnings(0 To machineCount)
+    
+    ' Initialize total counters
+    totalHours = 0
+    totalEarnings = 0
+    
+    ' Loop through each row in the specified sheet, assuming column E contains machine names, column G contains hours worked, and column L contains money earned
+    For Each cell In ws.Range("E3:E" & ws.Cells(ws.Rows.Count, "E").End(xlUp).Row)
+        machineName = CStr(cell.Value)
+        If machineName <> "" Then ' Only add if machine name is not empty
+            If IsNumeric(cell.Offset(0, 2).Value) Then
+                hoursWorked = cell.Offset(0, 2).Value ' Column G
+            Else
+                hoursWorked = 0 ' Set to 0 if the value is not numeric
+            End If
+            If IsNumeric(cell.Offset(0, 7).Value) Then
+                moneyEarned = cell.Offset(0, 7).Value ' Column L
+            Else
+                moneyEarned = 0 ' Set to 0 if the value is not numeric
+            End If
+            
+            ' Add to totals
+            totalHours = totalHours + hoursWorked
+            totalEarnings = totalEarnings + moneyEarned
+            
+            ' Check if machine is already in the arrays
+            found = False
+            For i = 0 To machineCount - 1
+                If machineNames(i) = machineName Then
+                    machineHours(i) = machineHours(i) + hoursWorked
+                    machineEarnings(i) = machineEarnings(i) + moneyEarned
+                    found = True
+                    Exit For
+                End If
+            Next i
+            
+            ' If machine is not found, add it to the arrays
+            If Not found Then
+                ReDim Preserve machineNames(0 To machineCount)
+                ReDim Preserve machineHours(0 To machineCount)
+                ReDim Preserve machineEarnings(0 To machineCount)
+                machineNames(machineCount) = machineName
+                machineHours(machineCount) = hoursWorked
+                machineEarnings(machineCount) = moneyEarned
+                machineCount = machineCount + 1
+            End If
+        End If
+    Next cell
+    
+    ' Find the cell with "S¿ndag" in column A
+    Set sundayCell = ws.Columns("A").Find(What:="S¿ndag", LookIn:=xlValues, LookAt:=xlWhole)
+    If sundayCell Is Nothing Then
+        MsgBox "Kunne ikke finde 'S¿ndag' i kolonne A."
+        Exit Sub
+    End If
+    
+    ' Determine the starting row for summary data (10 rows after "S¿ndag")
+    summaryStartRow = sundayCell.Row + 11
+    
+    ' Write the headers
+    ws.Cells(summaryStartRow, 2).Value = "Timer total" ' Column B
+    ws.Cells(summaryStartRow, 2).Font.Bold = True
+    ws.Cells(summaryStartRow, 3).Value = "KR i alt" ' Column C
+    ws.Cells(summaryStartRow, 3).Font.Bold = True
+    ws.Cells(summaryStartRow, 4).Value = "Time pris" ' Column D
+    ws.Cells(summaryStartRow, 4).Font.Bold = True
+    
+    ' Write the summary data starting 2 rows after the headers
+    summaryStartRow = summaryStartRow + 2
+    
+    For i = 0 To machineCount - 1
+        ws.Cells(summaryStartRow + i, 1).Value = machineNames(i) ' Column A
+        ws.Cells(summaryStartRow + i, 1).Font.Bold = True
+        ws.Cells(summaryStartRow + i, 2).Value = machineHours(i) ' Column B
+        ws.Cells(summaryStartRow + i, 2).NumberFormat = "0.0"
+        ws.Cells(summaryStartRow + i, 3).Value = machineEarnings(i) ' Column C
+        ws.Cells(summaryStartRow + i, 3).NumberFormat = "0.0"
+        If machineHours(i) <> 0 Then
+            ws.Cells(summaryStartRow + i, 4).Value = machineEarnings(i) / machineHours(i) ' Column D
+            ws.Cells(summaryStartRow + i, 4).NumberFormat = "0.0"
+        Else
+            ws.Cells(summaryStartRow + i, 4).Value = 0 ' Avoid division by zero
+            ws.Cells(summaryStartRow + i, 4).NumberFormat = "0.0"
+        End If
+    Next i
+    
+    ' Write the total hours and earnings two rows after the last machine summary
+    ws.Cells(summaryStartRow + machineCount + 2, 1).Value = "Total"
+    ws.Cells(summaryStartRow + machineCount + 2, 1).Font.Bold = True
+    ws.Cells(summaryStartRow + machineCount + 2, 2).Value = totalHours ' Column B
+    ws.Cells(summaryStartRow + machineCount + 2, 2).NumberFormat = "0.0"
+    ws.Cells(summaryStartRow + machineCount + 2, 3).Value = totalEarnings ' Column C
+    ws.Cells(summaryStartRow + machineCount + 2, 3).NumberFormat = "0.0"
+    If totalHours <> 0 Then
+        ws.Cells(summaryStartRow + machineCount + 2, 4).Value = totalEarnings / totalHours ' Column D
+        ws.Cells(summaryStartRow + machineCount + 2, 4).NumberFormat = "0.0"
+    Else
+        ws.Cells(summaryStartRow + machineCount + 2, 4).Value = 0 ' Avoid division by zero
+        ws.Cells(summaryStartRow + machineCount + 2, 4).NumberFormat = "0.0"
+    End If
+    
+    ' Update the "SUM" tab
+    ' Find the row for the specified week in the "SUM" tab
+    Set weekCol = sumWs.Columns("B")
+    Set weekPos = weekCol.Find(What:="uge " & weekNumber, LookIn:=xlValues, LookAt:=xlWhole)
+    If Not weekPos Is Nothing Then
+        sumRow = weekPos.Row
+        ' Loop through each machine and update the corresponding cells in the "SUM" tab
+        For i = 0 To machineCount - 1
+            ' Find the column for the specified machine in the "SUM" tab
+            Set machineCol = sumWs.Rows(2)
+            Set machinePos = machineCol.Find(What:=machineNames(i), LookIn:=xlValues, LookAt:=xlWhole)
+            If Not machinePos Is Nothing Then
+                ' Write the total hours and earnings in the corresponding cells
+                sumWs.Cells(sumRow, machinePos.Column).Value = machineHours(i)
+                sumWs.Cells(sumRow, machinePos.Column).NumberFormat = "0.0"
+                sumWs.Cells(sumRow, machinePos.Column + 1).Value = machineEarnings(i)
+                sumWs.Cells(sumRow, machinePos.Column + 1).NumberFormat = "0.0"
+            End If
+        Next i
+    Else
+        MsgBox "Uge " & weekNumber & " ikke fundet i 'SUM' fanen."
+    End If
+
+    MsgBox "Opsummering for " & sheetName & " gennemf¿rt og opdateret i 'SUM' fanen!"
+End Sub
+
