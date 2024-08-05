@@ -101,14 +101,14 @@ Sub UgeligSUM()
         End If
     Next cell
     
-    ' Find the cell with "Søndag" in column A
-    Set sundayCell = ws.Columns("A").Find(What:="Søndag", LookIn:=xlValues, LookAt:=xlWhole)
+    ' Find the cell with "S√∏ndag" in column A
+    Set sundayCell = ws.Columns("A").Find(What:="S√∏ndag", LookIn:=xlValues, LookAt:=xlWhole)
     If sundayCell Is Nothing Then
-        MsgBox "Kunne ikke finde 'Søndag' i kolonne A."
+        MsgBox "Kunne ikke finde 'S√∏ndag' i kolonne A."
         Exit Sub
     End If
     
-    ' Determine the starting row for summary data (10 rows after "Søndag")
+    ' Determine the starting row for summary data (10 rows after "S√∏ndag")
     summaryStartRow = sundayCell.Row + 11
     
     ' Write the headers
@@ -176,6 +176,5 @@ Sub UgeligSUM()
         MsgBox "Uge " & weekNumber & " ikke fundet i 'SUM' fanen."
     End If
 
-    MsgBox "Opsummering for " & sheetName & " gennemført og opdateret i 'SUM' fanen!"
+    MsgBox "Opsummering for " & sheetName & " gennemf√∏rt og opdateret i 'SUM' fanen!"
 End Sub
-
