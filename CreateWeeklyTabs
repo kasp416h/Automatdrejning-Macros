@@ -1,0 +1,73 @@
+Attribute VB_Name = "Module3"
+Sub OpretUgeligeFaner()
+    Dim i As Integer
+    Dim j As Integer
+    Dim ws As Worksheet
+    Dim dayNames As Variant
+    Dim dayName As Variant
+    Dim rowOffset As Integer
+    Dim weekTabName As String
+    
+    ' Array of day names
+    dayNames = Array("Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "L¿rdag", "S¿ndag")
+    
+    ' Loop to create 52 weeks
+    For i = 1 To 1
+        ' Create the week tab
+        Set ws = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+        ws.Name = i
+        
+        ' Set up the headers
+        With ws
+            .Cells(1, 1).Value = "Uge " & i
+            .Cells(1, 1).Font.Bold = True
+            .Cells(2, 1).Value = "Uger"
+            .Cells(2, 1).Font.Bold = True
+            .Cells(2, 2).Value = "Kunde"
+            .Cells(2, 2).Font.Bold = True
+            .Cells(2, 3).Value = "Tegnings nr."
+            .Cells(2, 3).Font.Bold = True
+            .Cells(2, 4).Value = "Tekst"
+            .Cells(2, 4).Font.Bold = True
+            .Cells(2, 5).Value = "Maskine"
+            .Cells(2, 5).Font.Bold = True
+            .Cells(2, 6).Value = "Emne tid"
+            .Cells(2, 6).Font.Bold = True
+            .Cells(2, 7).Value = "Timer"
+            .Cells(2, 7).Font.Bold = True
+            .Cells(2, 8).Value = "Opstilling"
+            .Cells(2, 8).Font.Bold = True
+            .Cells(2, 9).Value = "Antal fremstillede"
+            .Cells(2, 9).Font.Bold = True
+            .Cells(2, 10).Value = "Opstilling/K¿rsel"
+            .Cells(2, 10).Font.Bold = True
+            .Cells(2, 11).Value = "Stk pris u mat."
+            .Cells(2, 11).Font.Bold = True
+            .Cells(2, 12).Value = "Indt¾gt I alt:"
+            .Cells(2, 12).Font.Bold = True
+        End With
+        
+        ' Set up the days and rows for each day
+        rowOffset = 5
+        For Each dayName In dayNames
+            ws.Cells(rowOffset, 1).Value = dayName
+            ws.Cells(rowOffset, 1).Font.Bold = True
+            
+            ' Set up 7 rows for machine data under each day
+            For j = 1 To 7
+                ws.Cells(rowOffset + j, 7).Formula = "=SUM(F" & (rowOffset + j) & ")*I" & (rowOffset + j)
+                ws.Cells(rowOffset + j, 12).Formula = "=SUM(I" & (rowOffset + j) & ")*K" & (rowOffset + j)
+            Next j
+            
+            ' Add the sum of all the machines' "Indt¾gt I alt" in column N
+            ws.Cells(rowOffset + 8, 14).Formula = "=SUM(L" & (rowOffset + 1) & ":L" & (rowOffset + 7) & ")"
+            ws.Cells(rowOffset + 8, 14).Font.Bold = True
+
+            ' Move to the next day (7 rows + 2 row spacing)
+            rowOffset = rowOffset + 9
+        Next dayName
+    Next i
+    
+    MsgBox "52 weekly tabs have been created successfully!"
+End Sub
+
