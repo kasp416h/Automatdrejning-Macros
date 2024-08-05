@@ -9,7 +9,7 @@ Sub OpretUgeligeFaner()
     Dim weekTabName As String
     
     ' Array of day names
-    dayNames = Array("Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "L¿rdag", "S¿ndag")
+    dayNames = Array("Mandag", "Tirsdag", "Onsdag", "Torsdag", "Fredag", "LÃ¸rdag", "SÃ¸ndag")
     
     ' Loop to create 52 weeks
     For i = 1 To 1
@@ -39,11 +39,11 @@ Sub OpretUgeligeFaner()
             .Cells(2, 8).Font.Bold = True
             .Cells(2, 9).Value = "Antal fremstillede"
             .Cells(2, 9).Font.Bold = True
-            .Cells(2, 10).Value = "Opstilling/K¿rsel"
+            .Cells(2, 10).Value = "Opstilling/KÂ¿rsel"
             .Cells(2, 10).Font.Bold = True
             .Cells(2, 11).Value = "Stk pris u mat."
             .Cells(2, 11).Font.Bold = True
-            .Cells(2, 12).Value = "Indt¾gt I alt:"
+            .Cells(2, 12).Value = "Indt?gt I alt:"
             .Cells(2, 12).Font.Bold = True
         End With
         
@@ -59,15 +59,56 @@ Sub OpretUgeligeFaner()
                 ws.Cells(rowOffset + j, 12).Formula = "=SUM(I" & (rowOffset + j) & ")*K" & (rowOffset + j)
             Next j
             
-            ' Add the sum of all the machines' "Indt¾gt I alt" in column N
+            ' Add the sum of all the machines' "IndtÃ¦gt I alt" in column N
             ws.Cells(rowOffset + 8, 14).Formula = "=SUM(L" & (rowOffset + 1) & ":L" & (rowOffset + 7) & ")"
             ws.Cells(rowOffset + 8, 14).Font.Bold = True
 
             ' Move to the next day (7 rows + 2 row spacing)
             rowOffset = rowOffset + 9
         Next dayName
+        
+        ' Add the "Timer i alt:" and sum of all hours
+        rowOffset = rowOffset + 2
+    
+        ws.Cells(rowOffset, 6).Value = "Timer i alt:"
+        ws.Cells(rowOffset, 6).Font.Bold = True
+        ws.Cells(rowOffset, 7).Formula = "=SUM(G6:G" & (rowOffset - 4) & ")"
+        ws.Cells(rowOffset, 7).NumberFormat = "0"
+        
+        ' Add the "I alt:" and sum of all setup
+        rowOffset = rowOffset + 2
+        
+        ws.Cells(rowOffset, 9).Value = "I alt:"
+        ws.Cells(rowOffset, 9).Font.Bold = True
+        ws.Cells(rowOffset, 10).Formula = "=SUM(J6:J" & (rowOffset - 6) & ")"
+        ws.Cells(rowOffset, 10).NumberFormat = "0"
+        
+         ' Add the total sum of all earnings
+         ws.Cells(rowOffset, 12).Formula = "=SUM(L6:L" & (rowOffset - 6) & ")"
+         ws.Cells(rowOffset, 12).NumberFormat = "0.0"
+         
+         ' Add the total sum of setup and all earnings
+         rowOffset = rowOffset + 4
+         
+         ws.Cells(rowOffset, 10).Value = "SUM:"
+         ws.Cells(rowOffset, 10).Font.Bold = True
+         ws.Cells(rowOffset, 11).Formula = "=SUM(J" & (rowOffset - 4) & ":L" & (rowOffset - 4) & ")"
+         ws.Cells(rowOffset, 11).NumberFormat = "0.0"
+         
+         ' Add the target of total sum of setup and all earnings
+         rowOffset = rowOffset + 4
+         
+         ws.Cells(rowOffset, 10).Value = "MÃ¥l:"
+         ws.Cells(rowOffset, 10).Font.Bold = True
+         ws.Cells(rowOffset, 11).Value = 22500
+         ws.Cells(rowOffset, 11).Font.Bold = True
+         
+         ' Add calculate the difference between target and actual total sum
+         rowOffset = rowOffset - 2
+         
+         ws.Cells(rowOffset, 11).Formula = "=SUM(K" & (rowOffset - 2) & "-K" & (rowOffset + 2) & ")"
+         ws.Cells(rowOffset, 11).NumberFormat = "0.0"
     Next i
     
-    MsgBox "52 weekly tabs have been created successfully!"
+    MsgBox "52 ugelige faner er blevet oprettet!"
 End Sub
-
