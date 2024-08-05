@@ -68,7 +68,7 @@ Sub OpretUgeligeFaner()
         Next dayName
         
         ' Add the "Timer i alt:" and sum of all hours
-        rowOffset = rowOffset + 2
+        rowOffset = rowOffset + 3
     
         ws.Cells(rowOffset, 6).Value = "Timer i alt:"
         ws.Cells(rowOffset, 6).Font.Bold = True
