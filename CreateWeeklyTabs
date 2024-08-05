@@ -39,11 +39,11 @@ Sub OpretUgeligeFaner()
             .Cells(2, 8).Font.Bold = True
             .Cells(2, 9).Value = "Antal fremstillede"
             .Cells(2, 9).Font.Bold = True
-            .Cells(2, 10).Value = "Opstilling/K¿rsel"
+            .Cells(2, 10).Value = "Opstilling/Kørsel"
             .Cells(2, 10).Font.Bold = True
             .Cells(2, 11).Value = "Stk pris u mat."
             .Cells(2, 11).Font.Bold = True
-            .Cells(2, 12).Value = "Indt?gt I alt:"
+            .Cells(2, 12).Value = "Indtægt I alt:"
             .Cells(2, 12).Font.Bold = True
         End With
         
