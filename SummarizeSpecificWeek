@@ -19,7 +19,7 @@ Sub UgeligSUM()
     Dim machinePos As Range
     Dim weekPos As Range
     Dim sundayCell As Range
-    Dim lastNonEmptyWeekRow As Long
+    Dim nonZeroWeekCount As Long
     
     ' Prompt the user to enter the week number
     weekNumber = InputBox("Indtast uge nummer (f.eks. 1 for UGE 1):", "Uge Nummer")
@@ -177,15 +177,16 @@ Sub UgeligSUM()
         MsgBox "Uge " & weekNumber & " ikke fundet i 'SUM' fanen."
     End If
 
+    nonZeroWeekCount = 0
+
     For i = 56 To 5 Step -1
         If sumWs.Cells(i, 3).Value <> "" And sumWs.Cells(i, 3).Value <> 0 Then
-            lastNonEmptyWeekRow = i
-            Exit For
+            nonZeroWeekCount = nonZeroWeekCount + 1
         End If
     Next i
     
-    ' Update cell C60 with the formula dividing C58 by the last non-empty week value
-    sumWs.Cells(60, 3).Formula = "=SUM(C58)/" & lastNonEmptyWeekRow - 4
+    ' Update cell C60 with the formula dividing C58 by all non empty weeks
+    sumWs.Cells(60, 3).Formula = "=SUM(C58)/" & nonZeroWeekCount
 
     MsgBox "Opsummering for " & sheetName & " gennemført og opdateret i 'SUM' fanen!"
 End Sub
