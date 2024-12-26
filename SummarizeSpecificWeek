@@ -49,15 +49,18 @@ Sub UgeligSUM()
     Dim machineNames() As String
     Dim machineHours() As Double
     Dim machineEarnings() As Double
+    Dim machineSetups() As Double
     Dim machineCount As Integer
     machineCount = 0
     ReDim machineNames(0 To machineCount)
     ReDim machineHours(0 To machineCount)
     ReDim machineEarnings(0 To machineCount)
+    ReDim machineSetups(0 To machineCount)
     
     ' Initialize total counters
     totalHours = 0
     totalEarnings = 0
+    totalSetup = 0
     
     ' Loop through each row in the specified sheet, assuming column E contains machine names, column G contains hours worked, and column L contains money earned
     For Each cell In ws.Range("E3:E" & ws.Cells(ws.Rows.Count, "E").End(xlUp).Row)
@@ -73,10 +76,16 @@ Sub UgeligSUM()
             Else
                 moneyEarned = 0 ' Set to 0 if the value is not numeric
             End If
+            If IsNumeric(cell.Offset(0, 5).Value) Then
+                setupCount = cell.Offset(0, 5).Value ' Column J
+            Else
+                setupCount = 0 ' Set to 0 if the value is not numeric
+            End If
             
             ' Add to totals
             totalHours = totalHours + hoursWorked
             totalEarnings = totalEarnings + moneyEarned
+            totalSetup = totalSetup + setupCount
             
             ' Check if machine is already in the arrays
             found = False
@@ -84,6 +93,7 @@ Sub UgeligSUM()
                 If machineNames(i) = machineName Then
                     machineHours(i) = machineHours(i) + hoursWorked
                     machineEarnings(i) = machineEarnings(i) + moneyEarned
+                    machineSetups(i) = machineSetups(i) + setupCount
                     found = True
                     Exit For
                 End If
@@ -94,9 +104,11 @@ Sub UgeligSUM()
                 ReDim Preserve machineNames(0 To machineCount)
                 ReDim Preserve machineHours(0 To machineCount)
                 ReDim Preserve machineEarnings(0 To machineCount)
+                ReDim Preserve machineSetups(0 To machineCount)
                 machineNames(machineCount) = machineName
                 machineHours(machineCount) = hoursWorked
                 machineEarnings(machineCount) = moneyEarned
+                machineSetups(machineCount) = setupCount
                 machineCount = machineCount + 1
             End If
         End If
@@ -115,10 +127,12 @@ Sub UgeligSUM()
     ' Write the headers
     ws.Cells(summaryStartRow, 2).Value = "Timer total" ' Column B
     ws.Cells(summaryStartRow, 2).Font.Bold = True
-    ws.Cells(summaryStartRow, 3).Value = "KR i alt" ' Column C
+    ws.Cells(summaryStartRow, 3).Value = "KR" ' Column C
     ws.Cells(summaryStartRow, 3).Font.Bold = True
-    ws.Cells(summaryStartRow, 4).Value = "Time pris" ' Column D
+    ws.Cells(summaryStartRow, 4).Value = "Ops." ' Column D
     ws.Cells(summaryStartRow, 4).Font.Bold = True
+    ws.Cells(summaryStartRow, 5).Value = "Time pris" ' Column E
+    ws.Cells(summaryStartRow, 5).Font.Bold = True
     
     ' Write the summary data starting 2 rows after the headers
     summaryStartRow = summaryStartRow + 2
@@ -130,12 +144,14 @@ Sub UgeligSUM()
         ws.Cells(summaryStartRow + i, 2).NumberFormat = "0.0"
         ws.Cells(summaryStartRow + i, 3).Value = machineEarnings(i) ' Column C
         ws.Cells(summaryStartRow + i, 3).NumberFormat = "0.0"
+        ws.Cells(summaryStartRow + i, 4).Value = machineSetups(i) ' Column D
+        ws.Cells(summaryStartRow + i, 4).NumberFormat = "0.0"
         If machineHours(i) <> 0 Then
-            ws.Cells(summaryStartRow + i, 4).Value = machineEarnings(i) / machineHours(i) ' Column D
-            ws.Cells(summaryStartRow + i, 4).NumberFormat = "0.0"
+            ws.Cells(summaryStartRow + i, 5).Value = machineEarnings(i) / machineHours(i) ' Column E
+            ws.Cells(summaryStartRow + i, 5).NumberFormat = "0.0"
         Else
-            ws.Cells(summaryStartRow + i, 4).Value = 0 ' Avoid division by zero
-            ws.Cells(summaryStartRow + i, 4).NumberFormat = "0.0"
+            ws.Cells(summaryStartRow + i, 5).Value = 0 ' Avoid division by zero
+            ws.Cells(summaryStartRow + i, 5).NumberFormat = "0.0"
         End If
     Next i
     
@@ -146,12 +162,14 @@ Sub UgeligSUM()
     ws.Cells(summaryStartRow + machineCount + 2, 2).NumberFormat = "0.0"
     ws.Cells(summaryStartRow + machineCount + 2, 3).Value = totalEarnings ' Column C
     ws.Cells(summaryStartRow + machineCount + 2, 3).NumberFormat = "0.0"
+    ws.Cells(summaryStartRow + machineCount + 2, 4).Value = totalSetup ' Column D
+    ws.Cells(summaryStartRow + machineCount + 2, 4).NumberFormat = "0.0"
     If totalHours <> 0 Then
-        ws.Cells(summaryStartRow + machineCount + 2, 4).Value = totalEarnings / totalHours ' Column D
-        ws.Cells(summaryStartRow + machineCount + 2, 4).NumberFormat = "0.0"
+        ws.Cells(summaryStartRow + machineCount + 2, 5).Value = totalEarnings / totalHours ' Column E
+        ws.Cells(summaryStartRow + machineCount + 2, 5).NumberFormat = "0.0"
     Else
-        ws.Cells(summaryStartRow + machineCount + 2, 4).Value = 0 ' Avoid division by zero
-        ws.Cells(summaryStartRow + machineCount + 2, 4).NumberFormat = "0.0"
+        ws.Cells(summaryStartRow + machineCount + 2, 5).Value = 0 ' Avoid division by zero
+        ws.Cells(summaryStartRow + machineCount + 2, 5).NumberFormat = "0.0"
     End If
     
     ' Update the "SUM" tab
@@ -171,12 +189,14 @@ Sub UgeligSUM()
                 sumWs.Cells(sumRow, machinePos.Column).NumberFormat = "0.0"
                 sumWs.Cells(sumRow, machinePos.Column + 1).Value = machineEarnings(i)
                 sumWs.Cells(sumRow, machinePos.Column + 1).NumberFormat = "0.0"
+                sumWs.Cells(sumRow, machinePos.Column + 2).Value = machineSetups(i)
+                sumWs.Cells(sumRow, machinePos.Column + 2).NumberFormat = "0.0"
             End If
         Next i
     Else
         MsgBox "Uge " & weekNumber & " ikke fundet i 'SUM' fanen."
     End If
-
+    
     nonZeroWeekCount = 0
 
     For i = 56 To 5 Step -1
@@ -185,7 +205,7 @@ Sub UgeligSUM()
         End If
     Next i
     
-    ' Update cell C60 with the formula dividing C58 by all non empty weeks
+    ' Update cell C60 with the formula dividing C58 by all the non empty weeks
     sumWs.Cells(60, 3).Formula = "=SUM(C58)/" & nonZeroWeekCount
 
     MsgBox "Opsummering for " & sheetName & " gennemført og opdateret i 'SUM' fanen!"
